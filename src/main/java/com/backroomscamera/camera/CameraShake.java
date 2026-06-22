@@ -13,7 +13,6 @@ public class CameraShake {
     private float cameraZRot = 0f;
     private float amplitude = 1.0f;
 
-    // head bob
     private float bobStep = 0f;
     private float bobPitch = 0f;
     private float bobRoll = 0f;
@@ -35,19 +34,17 @@ public class CameraShake {
         boolean isMoving = playerSpeed > 0.02f;
         boolean isOnGround = player.onGround();
 
-        // --- шум (дыхание) ---
-        float noiseSpeedTarget = isMoving ? 0.3f : 0.15f;
-        noiseSpeed = lerp(noiseSpeed, noiseSpeedTarget, 0.06f);
+        float noiseSpeedTarget = isMoving ? 0.2f : 0.1f;
+        noiseSpeed = lerp(noiseSpeed, noiseSpeedTarget, 0.05f);
         noiseY += noiseSpeed;
 
-        // --- trauma ---
         float traumaTarget;
         if (!isOnGround) {
             traumaTarget = 0.0f;
         } else if (isMoving) {
-            traumaTarget = 0.12f;
+            traumaTarget = 0.08f;
         } else {
-            traumaTarget = 0.20f; // дыхание стоя
+            traumaTarget = 0.13f;
         }
         traumaGoal = lerp(traumaGoal, traumaTarget, 0.04f);
         trauma = lerp(trauma, traumaGoal, 0.03f);
@@ -58,26 +55,20 @@ public class CameraShake {
         float rawYaw   = sampleNoise(noiseY * 1.3f + 100f) * intensity;
         float rawRoll  = sampleNoise(noiseY * 0.8f + 200f) * intensity;
 
-        // --- head bob при ходьбе/беге ---
         if (isMoving && isOnGround) {
-            float stepSpeed = playerSpeed * 12f;
-            bobStep += stepSpeed;
-            // pitch: вверх-вниз
-            float targetBobPitch = (float) Math.sin(bobStep * 0.35f) * playerSpeed * 5.0f;
-            // roll: качание влево-вправо (в такт шагам, половина частоты)
-            float targetBobRoll = (float) Math.sin(bobStep * 0.175f) * playerSpeed * 12.0f;
-
-            bobPitch = lerp(bobPitch, targetBobPitch, 0.18f);
-            bobRoll  = lerp(bobRoll,  targetBobRoll,  0.18f);
+            bobStep += playerSpeed * 8f;
+            float targetBobPitch = (float) Math.sin(bobStep * 0.35f) * playerSpeed * 1.8f;
+            float targetBobRoll  = (float) Math.sin(bobStep * 0.175f) * playerSpeed * 4.0f;
+            bobPitch = lerp(bobPitch, targetBobPitch, 0.15f);
+            bobRoll  = lerp(bobRoll,  targetBobRoll,  0.15f);
         } else {
-            // плавно гасим bob
-            bobPitch = lerp(bobPitch, 0f, 0.08f);
-            bobRoll  = lerp(bobRoll,  0f, 0.08f);
+            bobPitch = lerp(bobPitch, 0f, 0.06f);
+            bobRoll  = lerp(bobRoll,  0f, 0.06f);
         }
 
-        pitchOffset = rawPitch * 2.5f + bobPitch;
-        yawOffset   = rawYaw  * 2.0f;
-        rollOffset  = rawRoll * 1.5f + bobRoll;
+        pitchOffset = rawPitch * 1.5f + bobPitch;
+        yawOffset   = rawYaw  * 1.0f;
+        rollOffset  = rawRoll * 1.0f + bobRoll;
 
         cameraZRot = rollOffset;
     }
