@@ -1,7 +1,7 @@
 package com.backroomscamera.camera;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
 public class CameraShake {
@@ -10,9 +10,12 @@ public class CameraShake {
     private float traumaGoal = 0f;
     private float noiseY = 0f;
     private float noiseSpeed = 0f;
-    private float noiseSpeedGoal = 0.4f;
-    private float amplitude = 1.0f;
     private float cameraZRot = 0f;
+    private float amplitude = 1.0f;
+
+    // head bob
+    private float bobProgress = 0f;
+    private float bobVelocity = 0f;
 
     public float pitchOffset = 0f;
     public float yawOffset = 0f;
@@ -28,35 +31,47 @@ public class CameraShake {
         double vx = player.getDeltaMovement().x;
         double vz = player.getDeltaMovement().z;
         float playerSpeed = (float) Math.sqrt(vx * vx + vz * vz);
-        boolean isMoving = playerSpeed > 0.01f;
+        boolean isMoving = playerSpeed > 0.02f;
+        boolean isOnGround = player.onGround();
 
-        float noiseSpeedTarget = isMoving ? 0.55f : 0.25f;
-        noiseSpeedGoal = lerp(noiseSpeedGoal, noiseSpeedTarget, 0.05f);
-        noiseSpeed = lerp(noiseSpeed, noiseSpeedGoal, 0.08f);
+        // --- скорость шума ---
+        float noiseSpeedTarget = isMoving ? 0.45f : 0.18f;
+        noiseSpeed = lerp(noiseSpeed, noiseSpeedTarget, 0.07f);
+        noiseY += noiseSpeed;
 
+        // --- trauma (дыхание/тряска) ---
         float traumaTarget;
-        if (!player.onGround()) {
+        if (!isOnGround) {
             traumaTarget = 0.0f;
         } else if (isMoving) {
-            traumaTarget = 0.28f;
+            traumaTarget = 0.18f;
         } else {
-            traumaTarget = 0.10f;
+            traumaTarget = 0.22f; // дыхание стоя сильнее
         }
 
-        traumaGoal = lerp(traumaGoal, traumaTarget, 0.06f);
-        trauma = lerp(trauma, traumaGoal, 0.04f);
-
-        noiseY += noiseSpeed;
+        traumaGoal = lerp(traumaGoal, traumaTarget, 0.05f);
+        trauma = lerp(trauma, traumaGoal, 0.03f);
 
         float intensity = trauma * trauma * amplitude;
 
         float rawPitch = sampleNoise(noiseY * 1.0f) * intensity;
-        float rawYaw = sampleNoise(noiseY * 1.3f + 100f) * intensity;
-        float rawRoll = sampleNoise(noiseY * 0.8f + 200f) * intensity;
+        float rawYaw   = sampleNoise(noiseY * 1.3f + 100f) * intensity;
+        float rawRoll  = sampleNoise(noiseY * 0.8f + 200f) * intensity;
 
-        pitchOffset = rawPitch * 2.5f;
-        yawOffset = rawYaw * 2.5f;
-        rollOffset = rawRoll * 1.5f;
+        // --- head bob при ходьбе ---
+        float bobTarget = 0f;
+        if (isMoving && isOnGround) {
+            float speed = Math.min(playerSpeed * 8f, 1.0f);
+            bobProgress += speed;
+            bobTarget = (float) Math.sin(bobProgress * 0.4f) * speed * 0.6f;
+        } else {
+            bobProgress *= 0.85f; // плавно гасим
+        }
+        bobVelocity = lerp(bobVelocity, bobTarget, 0.15f);
+
+        pitchOffset = rawPitch * 3.0f + bobVelocity;
+        yawOffset   = rawYaw  * 2.0f;
+        rollOffset  = rawRoll * 1.5f + bobVelocity * 0.3f;
 
         cameraZRot = rollOffset;
     }
