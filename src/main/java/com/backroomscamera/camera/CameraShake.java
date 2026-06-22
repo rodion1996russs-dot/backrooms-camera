@@ -57,8 +57,8 @@ public class CameraShake {
 
         if (isMoving && isOnGround) {
             bobStep += playerSpeed * 8f;
-            float targetBobPitch = (float) Math.sin(bobStep * 0.35f) * playerSpeed * 1.8f;
-            float targetBobRoll  = (float) Math.sin(bobStep * 0.175f) * playerSpeed * 4.0f;
+            float targetBobPitch = (float) Math.sin(bobStep * 0.35f) * playerSpeed * 0.8f;
+            float targetBobRoll  = (float) Math.sin(bobStep * 0.175f) * playerSpeed * 1.8f;
             bobPitch = lerp(bobPitch, targetBobPitch, 0.15f);
             bobRoll  = lerp(bobRoll,  targetBobRoll,  0.15f);
         } else {
