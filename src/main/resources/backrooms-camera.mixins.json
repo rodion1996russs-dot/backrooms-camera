@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.backroomscamera.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "CameraMixin",
+    "GameRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "backrooms-camera.refmap.json"
+}

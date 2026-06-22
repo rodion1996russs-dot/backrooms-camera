@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[mods]]
+modId="backroomscamera"
+version="1.0.0"
+displayName="Backrooms Camera"
+description='''
+Found-footage camera effect ported from SP-Backrooms Revamped (Fabric) to Forge.
+Adds camera shake, camera roll and smooth camera behaviour.
+'''
+
+[[dependencies.backroomscamera]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.backroomscamera]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"
